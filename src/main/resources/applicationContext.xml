@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        https://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <context:component-scan base-package="morning.cat"/>
+
+    <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource ">
+        <property name="url"
+                  value="jdbc:mysql://localhost:3306/hibernate_one2more?useUnicode=true&amp;characterEncoding=UTF-8"></property>
+        <property name="driverClassName" value="com.mysql.jdbc.Driver"></property>
+        <property name="username" value="root"></property>
+        <property name="password" value=""></property>
+    </bean>
+
+    <bean id="sessionFactory" class="org.springframework.orm.hibernate5.LocalSessionFactoryBean">
+        <property name="dataSource" ref="dataSource"/>
+
+        <property name="hibernateProperties">
+
+            <props>
+                <prop key="hibernate.dialect">org.hibernate.dialect.MySQL8Dialect</prop>
+                <prop key="hibernate.show_sql">true</prop>
+
+                <!-- 从hbm文件到数据库定义策略，建议设置为none，不检查po类和表结构是否一致 -->
+                <prop key="hibernate.hbm2ddl.auto">update</prop>
+
+                <!-- 日志输出中格式化sql -->
+                <prop key="hibernate.format_sql">true</prop>
+
+                <!-- 配置Hibernate的session管理机制，spring与hibernate整合后采用当session与当前线程绑定 -->
+                <prop key="hibernate.current_session_context_class">
+                    org.springframework.orm.hibernate5.SpringSessionContext
+                </prop>
+
+            </props>
+        </property>
+
+        <!-- 加载映射文件 -->
+        <property name="mappingResources">
+            <list>
+                <value>morning/cat/entity/product.hbm.xml</value>
+            </list>
+        </property>
+    </bean>
+
+    <bean id="hibernateTemplate" class="org.springframework.orm.hibernate5.HibernateTemplate">
+        <!-- spring与hibernate整合后默认必须在事务下对数据库执行写操作，如果将checkWriteOperations设置为false则没有事务也可写数据库，这样是为了单独测试dao方便 -->
+        <property name="checkWriteOperations" value="false"/>
+        <property name="sessionFactory" ref="sessionFactory"/>
+    </bean>
+
+</beans>
